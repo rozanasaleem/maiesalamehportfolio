@@ -7,8 +7,7 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { href: "/portfolio", label: "Work" },
   { href: "/journal", label: "Journal" },
-  { href: "/about", label: "About" },
-  { href: "https://maiecouture.com/contact", label: "Contact", external: true }
+  { href: "/contact", label: "Contact" }
 ];
 
 export function SiteNav() {
@@ -41,21 +40,9 @@ export function SiteNav() {
           className="flex w-full justify-between gap-4 text-[10px] uppercase tracking-editorial text-cream/62 md:w-auto md:justify-end md:gap-7 md:pb-2 md:text-[11px]"
         >
           {navItems.map((item) => (
-            item.external ? (
-              <a
-                key={item.href}
-                href={item.href}
-                className="nav-link"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {item.label}
-              </a>
-            ) : (
-              <Link key={item.href} href={item.href} className="nav-link">
-                {item.label}
-              </Link>
-            )
+            <Link key={item.href} href={item.href} className="nav-link">
+              {item.label}
+            </Link>
           ))}
         </nav>
       </div>

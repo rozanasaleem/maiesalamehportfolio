@@ -16,6 +16,47 @@ type ArchiveImage = {
   size: [number, number];
 };
 
+type PlacementCue = {
+  angle: number;
+  radius: number;
+  height: number;
+  side: number;
+  scale: number;
+  tilt: number;
+  drift: number;
+  speed: number;
+};
+
+type ArchiveMesh = THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> & {
+  userData: ArchiveImage & {
+    baseX: number;
+    baseY: number;
+    baseZ: number;
+    drift: number;
+    speed: number;
+    phase: number;
+  };
+};
+
+const placementCues: PlacementCue[] = [
+  { angle: -8, radius: 0.78, height: 2.45, side: -1.45, scale: 0.82, tilt: -0.11, drift: 0.32, speed: 0.36 },
+  { angle: 6, radius: 1.09, height: -1.75, side: 1.15, scale: 1.24, tilt: 0.07, drift: 0.18, speed: 0.29 },
+  { angle: -13, radius: 0.92, height: 3.35, side: 0.4, scale: 0.98, tilt: 0.13, drift: 0.26, speed: 0.34 },
+  { angle: 11, radius: 1.2, height: -3.05, side: -0.95, scale: 0.78, tilt: -0.05, drift: 0.2, speed: 0.27 },
+  { angle: -3, radius: 0.86, height: 0.85, side: 1.75, scale: 1.18, tilt: 0.03, drift: 0.16, speed: 0.31 },
+  { angle: 15, radius: 1.03, height: -0.45, side: -1.25, scale: 0.9, tilt: -0.15, drift: 0.25, speed: 0.38 },
+  { angle: -10, radius: 1.18, height: 2.75, side: 0.95, scale: 1.32, tilt: 0.09, drift: 0.22, speed: 0.26 },
+  { angle: 4, radius: 0.74, height: -2.35, side: -1.85, scale: 1.04, tilt: -0.02, drift: 0.3, speed: 0.33 },
+  { angle: 17, radius: 1.12, height: 1.4, side: 1.35, scale: 0.72, tilt: 0.16, drift: 0.19, speed: 0.41 },
+  { angle: -15, radius: 0.94, height: -3.2, side: 0.3, scale: 1.28, tilt: -0.08, drift: 0.17, speed: 0.3 },
+  { angle: 7, radius: 1.24, height: 0.25, side: -1.15, scale: 0.86, tilt: 0.04, drift: 0.28, speed: 0.35 },
+  { angle: -5, radius: 0.8, height: 3.55, side: 1.05, scale: 1.1, tilt: -0.14, drift: 0.21, speed: 0.28 },
+  { angle: 14, radius: 1.05, height: -0.95, side: -0.45, scale: 1.22, tilt: 0.06, drift: 0.24, speed: 0.32 },
+  { angle: -11, radius: 0.9, height: 2.25, side: -1.6, scale: 0.82, tilt: 0.12, drift: 0.31, speed: 0.39 },
+  { angle: 2, radius: 1.16, height: -2.85, side: 1.65, scale: 1.16, tilt: -0.06, drift: 0.18, speed: 0.25 },
+  { angle: -16, radius: 0.82, height: 0.55, side: 0.7, scale: 0.92, tilt: 0.08, drift: 0.29, speed: 0.37 }
+];
+
 const archiveImages: ArchiveImage[] = [
   { src: "/images/from-folder/embroidered-white-portrait.JPG", label: "COLLECTIONS", href: "/portfolio/collections", alt: "White embroidered Palestinian couture piece", angle: 0, radius: 10.2, height: 1.6, size: [2.2, 3.1] },
   { src: "/images/from-folder/wall/bridal-couple.JPG", label: "BRIDAL", href: "/portfolio/bridal", alt: "Bride and groom in embroidered garments", angle: 10, radius: 13.5, height: -1.3, size: [3.3, 2.4] },
@@ -112,7 +153,7 @@ export function CinematicLanding() {
     const pointer = new THREE.Vector2(10, 10);
     const targetPointer = new THREE.Vector2(0, 0);
     const lookDirection = new THREE.Vector3();
-    const meshes: Array<THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> & { userData: ArchiveImage }> = [];
+    const meshes: ArchiveMesh[] = [];
     let yaw = 0;
     let pitch = 0;
     let yawVelocity = 0.0014;
@@ -122,29 +163,46 @@ export function CinematicLanding() {
     let previousDragX = 0;
     let previousDragY = 0;
 
+    const isMobile = window.innerWidth < 768;
     archiveImages.forEach((image, index) => {
+      const cue = placementCues[index % placementCues.length];
       const texture = loader.load(image.src);
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.minFilter = THREE.LinearMipmapLinearFilter;
       texture.magFilter = THREE.LinearFilter;
 
-      const sizeScatter = 0.82 + ((index * 37) % 9) * 0.095;
-      const densityScale = (window.innerWidth < 768 ? 1.08 : 1.22) * sizeScatter;
+      const sizeScatter = cue.scale * (0.94 + ((index * 37) % 7) * 0.035);
+      const densityScale = (isMobile ? 0.9 : 1.18) * sizeScatter;
       const geometry = new THREE.PlaneGeometry(image.size[0] * densityScale, image.size[1] * densityScale);
       const material = new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
-        opacity: 0.82,
+        opacity: 0.76,
         side: THREE.DoubleSide
       });
-      const mesh = new THREE.Mesh(geometry, material) as THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> & { userData: ArchiveImage };
-      const angle = THREE.MathUtils.degToRad(image.angle + Math.sin(index * 12.9898) * 5.6);
-      const radius = image.radius * (window.innerWidth < 768 ? 0.82 : 0.76) + Math.cos(index * 2.31) * 1.15;
-      const scatteredHeight = image.height + Math.sin(index * 4.73) * 0.78;
-      mesh.position.set(Math.sin(angle) * radius, scatteredHeight, -Math.cos(angle) * radius);
-      mesh.lookAt(0, scatteredHeight * 0.18, 0);
-      mesh.rotateZ(Math.sin(index * 5.17) * 0.105);
-      mesh.userData = image;
+      const mesh = new THREE.Mesh(geometry, material) as ArchiveMesh;
+      const angle = THREE.MathUtils.degToRad(image.angle + cue.angle);
+      const ringScale = isMobile ? 0.86 : 0.78;
+      const radius = (image.radius + (index % 3) * 0.45) * ringScale * cue.radius;
+      const mobileHeight = image.height * 0.54 + cue.height * 0.48;
+      const desktopHeight = image.height + cue.height;
+      const scatteredHeight = clamp(isMobile ? mobileHeight : desktopHeight, isMobile ? -2.75 : -4.45, isMobile ? 2.95 : 4.75);
+      const sideOffset = cue.side * (isMobile ? 0.4 : 1);
+      const x = Math.sin(angle) * radius + Math.cos(angle) * sideOffset;
+      const z = -Math.cos(angle) * radius + Math.sin(angle) * sideOffset;
+
+      mesh.position.set(x, scatteredHeight, z);
+      mesh.lookAt(0, scatteredHeight * 0.26, 0);
+      mesh.rotateZ(cue.tilt * (isMobile ? 0.45 : 1));
+      mesh.userData = {
+        ...image,
+        baseX: x,
+        baseY: scatteredHeight,
+        baseZ: z,
+        drift: cue.drift * (isMobile ? 0.42 : 1),
+        speed: cue.speed,
+        phase: index * 1.73
+      };
       meshes.push(mesh);
       scene.add(mesh);
     });
@@ -219,7 +277,7 @@ export function CinematicLanding() {
         return;
       }
 
-      const target = hit.object as THREE.Mesh & { userData: ArchiveImage };
+      const target = hit.object as ArchiveMesh;
       setIsLeaving(true);
       target.scale.setScalar(1.18);
       setTimeout(() => router.push(target.userData.href), 420);
@@ -257,14 +315,20 @@ export function CinematicLanding() {
       meshes.forEach((mesh) => {
         const meshDirection = mesh.position.clone().sub(camera.position).normalize();
         const facing = clamp(meshDirection.dot(lookDirection), 0, 1);
-        const baseOpacity = 0.22 + facing * 0.76;
+        const depthDrift = Math.sin(elapsed * mesh.userData.speed + mesh.userData.phase);
+        const crossDrift = Math.cos(elapsed * mesh.userData.speed * 0.72 + mesh.userData.phase);
+        mesh.position.x = mesh.userData.baseX + crossDrift * mesh.userData.drift * 0.34;
+        mesh.position.y = mesh.userData.baseY + depthDrift * mesh.userData.drift;
+        mesh.position.z = mesh.userData.baseZ + crossDrift * mesh.userData.drift * 0.26;
+
+        const baseOpacity = 0.16 + facing * 0.82;
         mesh.material.opacity += (baseOpacity - mesh.material.opacity) * 0.04;
         mesh.scale.x += (1 - mesh.scale.x) * 0.05;
         mesh.scale.y += (1 - mesh.scale.y) * 0.05;
       });
 
       if (hit) {
-        const mesh = hit.object as THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> & { userData: ArchiveImage };
+        const mesh = hit.object as ArchiveMesh;
         mesh.material.opacity += (1 - mesh.material.opacity) * 0.12;
         mesh.scale.x += (1.055 - mesh.scale.x) * 0.12;
         mesh.scale.y += (1.055 - mesh.scale.y) * 0.12;
@@ -360,11 +424,8 @@ export function CinematicLanding() {
 
         <p className="spatial-nav">
           Explore the <Link href="/portfolio">WORK</Link>, read the{" "}
-          <Link href="/journal">JOURNAL</Link>, know{" "}
-          <Link href="/about">ABOUT</Link> Maie, or{" "}
-          <a href="https://maiecouture.com/contact" target="_blank" rel="noreferrer">
-            CONTACT
-          </a>
+          <Link href="/journal">JOURNAL</Link>, or{" "}
+          <Link href="/contact">CONTACT</Link>
         </p>
 
         <div className={`view-cursor ${hovered ? "is-active" : ""}`}>
