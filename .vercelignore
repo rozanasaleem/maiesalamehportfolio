@@ -1,0 +1,26 @@
+.next
+node_modules
+.vercel/*.tgz*
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+1.png
+ChatGPT Image Jul 6, 2026, 01_17_33 PM.png
+Untitled-removebg-preview.png
+apple-icon-removebg-preview.png
+public/music/hawana.mp3
+public/music/masar.mp3
+public/music/nawwar.mp3
+public/music/roubbama.mp3
+public/music/shajan.mp3
+public/images/home/making-research-book.png
+public/images/home/making-fabric-board.png
+public/images/home/making-sketch-dress.png
+public/images/home/making-material-swatches.png
+public/images/home/making-atelier-bw-clean.png
+public/images/home/making-garment-bag.png
+public/images/achievements/nadeen/nadeen-flag-full.png
+public/images/achievements/nadeen/nadeen-cape-portrait.png
+public/images/achievements/nadeen/nadeen-flag-portrait.png
+public/images/achievements/nadeen/nadeen-standing-full.png
